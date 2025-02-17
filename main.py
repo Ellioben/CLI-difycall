@@ -5,6 +5,7 @@ from typing import Optional, List, Dict
 from config import DIFY_PLATFORMS
 import argparse
 import sys
+import uuid
 
 app = FastAPI()
 
@@ -136,8 +137,6 @@ def main():
                        help=f'指定平台名称 (可用平台: {", ".join(DIFY_PLATFORMS.keys())})')
     parser.add_argument('--message', '-m', required=True,
                        help='要发送的消息内容')
-    parser.add_argument('--conversation-id', '-c',
-                       help='会话ID（可选）')
     
     args = parser.parse_args()
     
@@ -152,12 +151,25 @@ def main():
         client = DifyClient(platform=args.platform)
         response = client.chat(
             message=args.message,
-            conversation_id=args.conversation_id,
             stream=False
         )
-        print(response)
+        
+        # 处理响应
+        if isinstance(response, dict):
+            if 'answer' in response:
+                print(response['answer'])
+            elif 'message' in response:
+                print(response['message'])
+            else:
+                print(response)
+        else:
+            print(response)
+            
     except Exception as e:
         print(f"错误: {str(e)}")
+        if hasattr(e, 'response'):
+            print(f"响应状态码: {e.response.status_code}")
+            print(f"响应内容: {e.response.text}")
         sys.exit(1)
 
 if __name__ == '__main__':
