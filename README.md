@@ -1,5 +1,4 @@
 # CLI-difycall
-# Dify Chat CLI Tool
 
 A simple command line tool to chat with different Dify AI platforms.
 
